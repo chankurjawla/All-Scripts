@@ -28,7 +28,7 @@ def mergepdf():
     else:
         print("Merging aborted due to missing file(s).")
 
-if st.button():
+if st.button('Merge pdf'):
     mergepdf()
     st.rerun()
 st.download_button('Download merged file',output_pdf)
