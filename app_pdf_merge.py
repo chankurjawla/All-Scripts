@@ -25,6 +25,7 @@ def mergepdf():
             merger.write(output_pdf)
 
         merger.close()
+        return output_pdf
     else:
         print("Merging aborted due to missing file(s).")
 
