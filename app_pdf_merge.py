@@ -33,4 +33,4 @@ def mergepdf():
 if st.button('Merge pdf'):
     mergepdf()
     st.rerun()
-st.download_button('Download merged file',output_pdf)
+    st.download_button('Download merged file',output_pdf)
