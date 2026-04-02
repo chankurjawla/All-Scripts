@@ -26,7 +26,9 @@ def parse_sms(text):
 
     # Attempt 3: Look for merchant right after 'at' or 'on'
     # Capture words, stopping at numbers or date patterns
-    pattern = r"(?:;|Info|At|on(?!\s*(?:HDFC|ICICI|\d+)))\s+([A-Z0-9\s&.*]+?)(?=\s(?:credited|Available|by|Avl|on|at|\.)|$)"
+    #pattern = r"(?:;|Info|At|on(?!\s*(?:HDFC|ICICI|\d+)))\s+([A-Z0-9\s&.*]+?)(?=\s(?:credited|Available|by|Avl|on|at|\.)|$)"
+    #New pattern added and old masked on 02-Apr-2026 
+    pattern = r"(?:;|Info|At|from|on(?!\s*(?:HDFC|ICICI|\d+)))\s+([A-Z0-9\s&.*-]+?)(?=\s(?:credited|Available|by|Avl|on|at|\.|UPI)|$)"
     match_at_on = re.search(pattern, text, re.IGNORECASE)
     
     if not match_at_on:
