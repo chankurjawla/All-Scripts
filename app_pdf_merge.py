@@ -1,5 +1,6 @@
 import streamlit as st
 from PyPDF2 import PdfMerger
+import os
 
 st.subheader('Merge PDF files!')
 #st.write('Select pdfs to be merged.')
