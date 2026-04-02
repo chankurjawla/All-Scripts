@@ -1,25 +1,36 @@
 import streamlit as st
 from PyPDF2 import PdfMerger
-import os
+import io
 
 st.subheader('Merge PDF files!')
-#st.write('Select pdfs to be merged.')
-pdf_files = st.file_uploader('upload files to be merged',type=["pdf","PDF"],accept_multiple_files=True, key=None)
-output_filename = 'merged_document.pdf'
-def mergepdf():
+
+pdf_files = st.file_uploader('Upload files to be merged', type=["pdf"], accept_multiple_files=True)
+
+def merge_pdfs(files):
     merger = PdfMerger()
-    # Check if input files exist before merging
-    all_files_exist = True
-    for pdf_file in pdf_files:
-        merger.append(pdf_file)
+    for pdf in files:
+        merger.append(pdf)
+    
+    # Create a byte buffer to hold the PDF in memory
+    output_stream = io.BytesIO()
+    merger.write(output_stream)
+    merger.close()
+    
+    # Seek to the start of the stream so the download button can read it
+    output_stream.seek(0)
+    return output_stream
 
-    # Write the merged PDF to an output file
-    with open(output_filename, 'wb') as output_pdf:
-        merger.write(output_pdf)
-        merger.close()
-    return output_pdf
-
-if st.button('Merge pdf'):
-    mergepdf()
-    st.rerun()
-    st.download_button('Download merged file',output_pdf)
+if pdf_files:
+    if st.button('Merge PDFs'):
+        with st.spinner('Merging...'):
+            merged_pdf_stream = merge_pdfs(pdf_files)
+            
+            st.success('Done!')
+            st.download_button(
+                label="Download merged PDF",
+                data=merged_pdf_stream,
+                file_name="merged_document.pdf",
+                mime="application/pdf"
+            )
+else:
+    st.info("Please upload at least two PDF files.")
