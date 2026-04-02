@@ -11,7 +11,6 @@ def mergepdf():
     # Check if input files exist before merging
     all_files_exist = True
     for pdf_file in pdf_files:
-        for pdf_file in pdf_files:
         merger.append(pdf_file)
 
     # Write the merged PDF to an output file
