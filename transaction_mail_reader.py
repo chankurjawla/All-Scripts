@@ -28,12 +28,16 @@ def parse_sms(text):
     # Capture words, stopping at numbers or date patterns
     #pattern = r"(?:;|Info|At|on(?!\s*(?:HDFC|ICICI|\d+)))\s+([A-Z0-9\s&.*]+?)(?=\s(?:credited|Available|by|Avl|on|at|\.)|$)"
     #New pattern added and old masked on 02-Apr-2026 
-    #pattern = r"(?:;|Info|At|from|on(?!\s*(?:HDFC|ICICI|\d+)))\s+([A-Z0-9\s&.*-]+?)(?=\s(?:credited|Available|by|Avl|on|at|\.|UPI)|$)"
-    pattern = r"(?:;|Info(?:)?|At|from|on(?!\s*(?:HDFC|ICICI|\d+)))[\s.:\-\*]*([A-Z0-9\s&.*-]+?)(?=[ .]?(?:credited|Available|by|Avl|on|at|UPI)|$)"
-    match_at_on = re.search(pattern, text, re.IGNORECASE)
+    pattern1 = r"(?:;|Info|At|from|on(?!\s*(?:HDFC|ICICI|\d+)))\s+([A-Z0-9\s&.*-]+?)(?=\s(?:credited|Available|by|Avl|on|at|\.|UPI)|$)"
+    pattern2 = r"(?:;|Info(?:)?|At|from|on(?!\s*(?:HDFC|ICICI|\d+)))[\s.:\-\*]*([A-Z0-9\s&.*-]+?)(?=[ .]?(?:credited|Available|by|Avl|on|at|UPI)|$)"
+    match_at_on = re.search(pattern1, text, re.IGNORECASE)
     
     if not match_at_on:
-        merchant = "Unknown"
+        match_at_on = re.search(pattern2, text, re.IGNORECASE)
+        if match_at_on:
+            merchant = match_at_on.group(1).strip()
+        else:
+            merchant = "Unknown"
     else:  
         merchant = match_at_on.group(1).strip()
     return {
