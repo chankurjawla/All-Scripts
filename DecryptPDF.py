@@ -2,57 +2,51 @@ import os
 import PyPDF2
 
 def decrypt_pdf_files(directory):
-    """
-    Scans a directory for PDF files, decrypts them, and saves the decrypted files.
-
-    Args:
-        directory (str): The path to the directory containing the PDF files.
-    """
     for filename in os.listdir(directory):
-        if filename.endswith(".pdf") or filename.endswith(".PDF")and "_decrypted" not in filename:
-            # Extract the password from the filename
-            parts = filename.split("_")
+        # lower() handles .pdf and .PDF in one go
+        if filename.lower().endswith(".pdf") and "_decrypted" not in filename:
+            
+            # Use rsplit to split from the right, ensuring we only remove the extension
+            # Then split by "_" to find the password
+            name_part = filename.rsplit(".", 1)[0]
+            parts = name_part.split("_")
+            
             if len(parts) > 1:
-                password = parts[-1].split(".")[0]
-                print(password)
-                #password = "BCPPA8832C"
+                password = parts[-1]  # The last part after the last underscore
                 input_file = os.path.join(directory, filename)
-                output_file = os.path.join(directory, f"{'_'.join(parts[:-1])}_decrypted.pdf")
+                
+                # Reconstruct name without the password for the output
+                clean_name = "_".join(parts[:-1])
+                output_file = os.path.join(directory, f"{clean_name}_decrypted.pdf")
 
                 try:
-                    # Open the PDF file in read-binary mode
                     with open(input_file, 'rb') as file:
                         pdf_reader = PyPDF2.PdfReader(file)
 
-                        # Check if the PDF is encrypted
                         if pdf_reader.is_encrypted:
-                            # Decrypt the PDF using the provided password
-                            if pdf_reader.decrypt(password) == 2:
-                                print(f"Password is correct for {filename}. Decrypting PDF...")
-
-                                # Create a PDF writer object
+                            # 1 = User Password, 2 = Owner Password
+                            decrypt_status = pdf_reader.decrypt(password)
+                            
+                            if decrypt_status in (1, 2):
+                                print(f"Success: Decrypting {filename}...")
                                 pdf_writer = PyPDF2.PdfWriter()
 
-                                # Add all pages from the input PDF to the writer
                                 for page in pdf_reader.pages:
                                     pdf_writer.add_page(page)
 
-                                # Write the decrypted PDF to the output file
                                 with open(output_file, 'wb') as output:
                                     pdf_writer.write(output)
 
-                                print(f"PDF decrypted and saved to {output_file}")
-
-                                # Delete the original file
+                                # Important: Close the file handle before deleting!
+                                file.close() 
                                 os.remove(input_file)
-                                print(f"Original file {filename} deleted.")
+                                print(f"Done. Original removed.")
                             else:
-                                print(f"Incorrect password for {filename}. Skipping...")
+                                print(f"Fail: Wrong password for {filename}.")
                         else:
-                            print(f"{filename} is not encrypted. Skipping...")
+                            print(f"Skip: {filename} is not encrypted.")
                 except Exception as e:
-                    print(f"An error occurred while processing {filename}: {e}")
+                    print(f"Error on {filename}: {e}")
 
-# Example usage:
 directory = "/srv/dev-disk-by-uuid-9e1c6e06-04c9-4670-9c99-98aaab1929e2/NAS/1_Document/0DecryptionFolder"
 decrypt_pdf_files(directory)
