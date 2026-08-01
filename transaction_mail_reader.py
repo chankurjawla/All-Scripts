@@ -24,10 +24,6 @@ def parse_sms(text):
 
     merchant = "Unknown" # Default value
 
-    # Attempt 3: Look for merchant right after 'at' or 'on'
-    # Capture words, stopping at numbers or date patterns
-    #pattern = r"(?:;|Info|At|on(?!\s*(?:HDFC|ICICI|\d+)))\s+([A-Z0-9\s&.*]+?)(?=\s(?:credited|Available|by|Avl|on|at|\.)|$)"
-    #New pattern added and old masked on 02-Apr-2026 
     pattern1 = r"(?:;|Info|At|from|on(?!\s*(?:HDFC|ICICI|\d+)))\s+([A-Z0-9\s&.*-]+?)(?=\s(?:credited|Available|by|Avl|on|at|\.|UPI)|$)"
     pattern2 = r"(?:;|Info(?:)?|At|from|on(?!\s*(?:HDFC|ICICI|\d+)))[\s.:\-\*]*([A-Z0-9\s&.*-]+?)(?=[ .]?(?:credited|Available|by|Avl|on|at|UPI)|$)"
     match_at_on = re.search(pattern1, text, re.IGNORECASE)
@@ -93,7 +89,6 @@ with IMAPClient(HOST) as server:
         row = parse_sms(body)
         extracted_rows.append(row)
         sender_details.append(sender)
-        #df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
 
         server.add_flags(uid, [b'\Seen'])
         server.copy(uid, DEST_LABEL)
@@ -105,10 +100,8 @@ with IMAPClient(HOST) as server:
 if extracted_rows:
     df = pd.DataFrame(extracted_rows)
     df['Spender'] = sender_details
-    
-    # Now call your processor
-    # df = clean_data(Input_df, Column_name,Querried Column, json_file_name) this process value from "Raw SMS" column
-    #df = clean_data(df, "Category", "Merchant", "categories")
+    df['Merchant'] = df['Merchant'].str.replace(r'[\n\r]', ' ', regex=True)    
+
     try:
         df_cat = predict_category_using_ML(df) # Added ML code to predict Category of transaction
     except Exception as e:
